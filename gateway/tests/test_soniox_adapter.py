@@ -121,3 +121,21 @@ def test_config_message_shape():
     assert message["enable_endpoint_detection"] is True
     assert message["context"] == {"terms": ["Celebrex"]}
     assert message["max_endpoint_delay_ms"] == 1500
+
+
+def test_config_message_merges_keyterms_with_provider_params_context():
+    # Regression: a plain top-level dict.update(provider_params) replaced
+    # message["context"] wholesale, silently dropping the `terms` list set
+    # from config.keyterms whenever a caller also passed provider_params
+    # containing its own "context" key (e.g. context.general). Caught via a
+    # real caller combining both -- Soniox never even saw the terms.
+    config = STTConfig(
+        model="stt-rt-v5", encoding="linear16", sample_rate=16000,
+        keyterms=("Celebrex", "metformin"),
+        provider_params={"context": {"general": "cardiology follow-up"}},
+    )
+    message = build_config_message("key123", config)
+    assert message["context"] == {
+        "terms": ["Celebrex", "metformin"],
+        "general": "cardiology follow-up",
+    }
