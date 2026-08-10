@@ -88,7 +88,14 @@ def build_config_message(api_key: str, config: STTConfig) -> dict:
         message["enable_speaker_diarization"] = True
     if config.keyterms:
         message["context"] = {"terms": list(config.keyterms)}
-    message.update(config.provider_params)
+    provider_params = dict(config.provider_params)
+    extra_context = provider_params.pop("context", None)
+    if extra_context:
+        # A plain top-level update() here would replace the whole `context`
+        # key wholesale, silently dropping the `terms` list just set above
+        # from config.keyterms (caught via a real caller that passed both).
+        message.setdefault("context", {}).update(extra_context)
+    message.update(provider_params)
     return message
 
 
