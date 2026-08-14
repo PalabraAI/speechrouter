@@ -24,6 +24,7 @@ from .mistral import adapter as _mistral_adapter  # noqa: F401
 from .mistral import batch as _mistral_batch  # noqa: F401
 from .openai import adapter as _openai_adapter  # noqa: F401
 from .openai import batch as _openai_batch  # noqa: F401
+from .palabra import adapter as _palabra_adapter  # noqa: F401  (self-registers)
 from .registry import (  # noqa: F401
     ProviderNotConfigured,
     register_stt_batch,
