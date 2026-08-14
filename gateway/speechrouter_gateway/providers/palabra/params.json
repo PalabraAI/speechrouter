@@ -1,0 +1,25 @@
+{
+  "forwarding": {
+    "streaming": "URL query params"
+  },
+  "note": "Palabra's STT endpoint takes all configuration as query parameters -- there is no config frame, and `token`, `format`, `sample_rate` and `language` are owned by the adapter (restating them here is ignored). `translate_languages` turns on live translation; those frames are delivered as ordinary transcripts tagged with the target language in `lang`, with their `end` advanced by 1ms per target so the failover dedup gate does not mistake them for a replay of the source final.",
+  "params": [
+    {
+      "name": "translate_languages",
+      "type": "string",
+      "modes": [
+        "streaming"
+      ],
+      "doc": "Comma-separated target languages (e.g. es,de,fr); translations arrive as transcripts tagged by `lang`"
+    },
+    {
+      "name": "enable_filler_filter",
+      "type": "boolean",
+      "default": true,
+      "modes": [
+        "streaming"
+      ],
+      "doc": "Strip filler words; on by default for every language except ja"
+    }
+  ]
+}

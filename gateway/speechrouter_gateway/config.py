@@ -46,6 +46,9 @@ class Settings(BaseSettings):
     speechmatics_api_key: str = ""
     telnyx_api_key: str = ""
     mistral_api_key: str = ""
+    palabra_api_key: str = ""
+    # Palabra endpoints are per-region; STT is served from `eu` only today.
+    palabra_region: str = "eu"
     google_project_id: str = ""
     # Full service-account JSON as a string secret -- keeps prod deploys on
     # the same plain-env-var pattern as every other provider (no file

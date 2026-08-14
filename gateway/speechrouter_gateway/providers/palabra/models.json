@@ -1,0 +1,30 @@
+[
+  {
+    "slug": "palabra/asr-v1",
+    "provider": "palabra",
+    "name": "Palabra Realtime ASR v1",
+    "kind": "stt",
+    "modes": [
+      "streaming"
+    ],
+    "pricing": {
+      "per_audio_minute_usd": 0.002
+    },
+    "capabilities": {
+      "diarization": false,
+      "word_timestamps": false,
+      "interim_results": true,
+      "endpointing": false,
+      "keyword_boosting": false,
+      "languages": [
+        "auto"
+      ],
+      "encodings": [
+        "linear16",
+        "linear32",
+        "mulaw",
+        "alaw"
+      ]
+    }
+  }
+]
