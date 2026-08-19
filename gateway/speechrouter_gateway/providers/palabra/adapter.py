@@ -1,73 +1,41 @@
 """Palabra streaming STT adapter (raw WebSocket, /asr/v1/speech-to-text/stream).
 
-Protocol facts (docs/providers/palabra.md, verified 2026-08-13 against the
-docs and the official SDK palabra-ai-python v2.1.0):
-- Auth: API key as the `token` query param (an `Authorization` header also
-  works). NO session brokering: the server creates the streaming session for
-  the lifetime of the connection and reaps it when the socket ends, so
-  close() has nothing to delete upstream.
-- All config is URL query params. There is NO config frame after connect.
-- Endpoints are per-region; STT exists only in `eu` today.
-- Up: raw PCM as binary frames, 320ms chunks, paced to realtime (the wire
-  carries AUDIO_STREAM_TOO_FAST/TOO_SLOW/STALLED warnings). Both are enforced
-  HERE — client framing is not forwarded verbatim. See _PACING.
-- Down: JSON text frames keyed by `message_type`:
-    {"message_type":"transcription","transcription_id":"..","language":"en",
-     "is_eos":false,"segment":{"text":"..","start_time":0.32,"end_time":1.84},
-     "delta":{...}}
-  `is_eos` is the finality flag. Times are SECONDS already.
-- **segment.text is authoritative; `delta` is ignored.** Delta semantics flip
-  with enable_filler_filter (off: append-only; on: the tail may be rewritten
-  mid-segment). The filter defaults ON, so reading the whole segment every
-  time is the only reading correct under both.
-- No word timestamps, no confidence, no speaker labels -> words=None and
-  Capabilities.diarization False so the resolver rejects diarization before
-  a socket is opened.
-- `translated_transcription` frames appear only when the caller opts in via
-  provider_params.translate_languages. They are delivered as ordinary
-  Transcripts tagged with the TARGET language in `lang`. See _TRANSLATION.
-- Errors: 401/409 land on the HTTP upgrade, not as frames. After a successful
-  upgrade the docs promise no application-level error frames — the server just
-  closes. The SDK's parser nonetheless knows `error`/`warning` messages, so we
-  handle them defensively and still classify on the close code.
-- Liveness is standard WS ping/pong (the SDK dials ping_interval=10), NOT an
-  app-level keepalive frame. Do not copy Telnyx's ping_interval=None here.
-- Billing: $0.002 per minute of audio processed (AUDIO_TIME).
+Protocol notes, measurements and the open questions behind the choices here:
+docs/providers/palabra.md.
 
-_TRANSLATION: a translated frame is emitted as an ordinary Transcript tagged
-with the TARGET language in `lang`. These only exist when the caller passed
-provider_params.translate_languages, so nobody gets them unasked, and `lang`
-keeps them separable from the source stream — the Soniox model, where one
-stream carries both and the client picks.
+- All session config travels as query params; there is no config frame.
+- `segment.text` carries the whole segment and is authoritative.
+  `delta` is ignored: with enable_filler_filter on (the default) the tail can be
+  rewritten mid-segment, so only reading the whole segment is correct.
+- `is_eos` marks finality, and times are already in seconds.
+- The protocol has no word timings, confidence or speaker labels, so words=None
+  and Capabilities.diarization is False.
+- The protocol has no end-of-audio message, so finish() pads silence until the
+  server's endpointer emits the last final.
+- `translated_transcription` frames arrive only when the caller sets
+  provider_params.translate_languages. See _TRANSLATION.
+- send_audio re-chunks to CHUNK_MS and paces, because nothing above the adapter
+  does. See _PACING.
+- The server owns the session for the life of the connection, so close() has
+  nothing to delete upstream.
+- 401 and 409 arrive as the status of a failed HTTP upgrade, not as frames.
+  The docs promise no application-level error frames after a successful upgrade,
+  but the SDK parses `error`/`warning`, so parse_message handles them and the
+  close code stays the primary signal.
+- The protocol has no keepalive frame; PING_INTERVAL is WS-level liveness only.
 
-Live-verified 2026-08-13: a translated final carries the SAME `end` timestamp
-as the source final it belongs to, and it arrives AFTER that source final.
-router/session.py enforces the spec's failover-dedup guarantee by dropping any
-final whose end does not advance past the previous one, so a verbatim
-translated final is swallowed one layer above this adapter and the client sees
-nothing. Rather than weaken that invariant for one provider, this adapter
-advances the translated final's `end` by _TRANSLATION_END_NUDGE per target
-language (1ms, 2ms, ... in the order the caller listed them in
-translate_languages). Consequences, all deliberate:
-- the offset is deterministic — same target list, same slot — so a replay
-  after failover produces the SAME nudged end and is still deduped;
-- it is applied to FINALS only, since partials never reach the dedup gate;
-- it is a fabrication of at most a few ms on a segment-level timestamp that
-  is, by construction, a copy of the source segment's.
-The honest fix is a dedicated translation event in packages/spec; this keeps
-translation deliverable until that lands, without touching the session engine.
+_TRANSLATION: a translated frame is emitted as an ordinary Transcript tagged with
+the target language in `lang`.
+Its `end` is advanced by _TRANSLATION_END_NUDGE per target language, in the order
+the caller listed them, so the session layer's dedup gate does not read it as a
+replay of the source final.
+  - finals only: partials never reach that gate;
+  - deterministic, so a failover replay produces the same `end`.
 
-_PACING: the wire wants 320ms frames paced to realtime, and nothing above the
-adapter re-chunks or paces (Capabilities.chunk_ms_*/realtime_pacing_required
-are declarative — the session engine never reads them). send_audio therefore
-buffers into exact CHUNK_MS frames and runs them through a token bucket. The
-bucket is not pinned to 1x realtime: after a failover the session replays up
-to ring_buffer_seconds of audio into a fresh adapter, and a strictly-realtime
-adapter could never work that backlog off. _MAX_REALTIME_FACTOR caps how fast
-the backlog drains, _MAX_BURST_SECONDS caps the credit a quiet stretch banks.
-Whether Palabra drops or merely warns above realtime is still open
-(docs/providers/palabra.md #8), so the ceiling stays low and
-AUDIO_STREAM_TOO_FAST is surfaced in the logs.
+_PACING: the token bucket is capped at _MAX_REALTIME_FACTOR rather than 1x,
+because a failover replays up to ring_buffer_seconds of audio into a fresh
+adapter and a strictly realtime adapter could never drain that backlog.
+_MAX_BURST_SECONDS caps the credit a quiet stretch banks.
 """
 
 import asyncio
@@ -112,16 +80,16 @@ _ENCODING_MAP = {
 _TRANSCRIPT_TYPES = frozenset({"transcription", "translated_transcription"})
 _TRANSLATED_TYPE = "translated_transcription"
 
-# Digital silence differs per codec: zero bytes are silence for linear PCM but
-# a loud buzz in mulaw/alaw, where the silent code is 0xFF / 0xD5.
+# The silent byte differs per codec: 0x00 for linear PCM, 0xFF mulaw, 0xD5 alaw.
+# Zero bytes decode to a loud tone in mulaw/alaw, not to silence.
 _SILENCE_BYTE = {"linear16": b"\x00", "linear32": b"\x00", "mulaw": b"\xff", "alaw": b"\xd5"}
 _BYTES_PER_SAMPLE = {"linear16": 2, "linear32": 4, "mulaw": 1, "alaw": 1}
 CHUNK_MS = 320  # vendor-recommended chunk length
 
-# Query keys this adapter owns. urlencode would happily emit a SECOND copy of
-# any of them from provider_params, leaving the server to choose — and a
-# provider_params `sample_rate` disagreeing with the audio actually sent is
-# silent corruption, not a passthrough feature.
+# Query keys this adapter sets itself.
+# A provider_params copy of one of them puts two values in the URL, and the
+# server picks one.
+# A sample_rate that disagrees with the audio being sent corrupts the transcript.
 RESERVED_QUERY_PARAMS = frozenset({"token", "format", "sample_rate", "language"})
 
 # See _TRANSLATION. Must survive the session layer's round(_, 3) on timestamps,
@@ -214,9 +182,11 @@ def parse_message(
     include_raw: bool = False,
     translation_nudge: Mapping[str, float] | None = None,
 ) -> list[STTEvent]:
-    """Pure translation of one Palabra JSON frame into normalized events.
+    """Translate one Palabra JSON frame into normalized events.
 
-    Side-effect free so fixture tests can drive it without a socket.
+    Needs no socket and no adapter state, so fixture tests call it directly.
+    A `warning` frame logs its code and returns [].
+    An `error` frame raises ProviderStreamError.
     """
     msg = json.loads(raw)
     kind = msg.get("message_type", "")
@@ -233,8 +203,7 @@ def parse_message(
         )
     if kind == "warning":
         data = msg.get("data") or msg
-        # AUDIO_STREAM_TOO_FAST / TOO_SLOW / STALLED — pacing complaints, not
-        # stream-fatal. Surface in logs; the stream keeps running.
+        # Warnings are not fatal: log the code and keep reading.
         logger.warning(
             "palabra warning",
             extra={"provider": "palabra", "code": data.get("code", "")},
@@ -285,16 +254,11 @@ class PalabraSTTStream(STTStreamProvider):
     name = "palabra"
     capabilities = CAPABILITIES
 
-    # The STT lane has no EOS message (the S2S lane's end_task/eos_timeout
-    # does not exist here), so the only way to make the recognizer emit the
-    # last utterance is to feed it silence until its endpointer fires.
-    #
-    # Live-verified 2026-08-13: streaming a file and simply closing LOSES the
-    # tail — the last utterance stayed a partial forever ("...that
-    # transcripts", dropping "arrive correctly") and the server sat idle for
-    # 10s before closing with 1001. Padding with silence produced the
-    # complete final 1.03s later. These two constants are that measurement
-    # plus headroom.
+    # The STT lane has no end-of-audio message, and closing the socket drops the
+    # utterance still in flight.
+    # Feeding silence makes the server's endpointer fire and emit the final,
+    # which takes about a second; these constants are that plus headroom.
+    # The measured run is in docs/providers/palabra.md.
     _SILENCE_FLUSH_SECONDS = 1.5
     _FINISH_GRACE_SECONDS = 1.0
 
@@ -451,7 +415,7 @@ class PalabraSTTStream(STTStreamProvider):
                 for _ in range(chunks):
                     await self._send_paced(self._silence_chunk)
         except websockets.exceptions.ConnectionClosed:
-            pass  # server already hung up: nothing left to flush into
+            pass  # the server already closed the connection: nothing to flush into
         await asyncio.sleep(self._FINISH_GRACE_SECONDS)
         # events() treats a close at this point (finished=True) as a clean end
         # of stream, whether it arrives as ConnectionClosedOK or not.

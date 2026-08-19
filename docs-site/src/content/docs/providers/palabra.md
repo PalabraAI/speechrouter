@@ -20,7 +20,7 @@ Reach past the unified surface with [`provider_params`](/guides/streaming/#query
 `{provider}Params` interfaces (`providerParams` option / `provider_params=` kwarg).
 
 :::note
-Palabra's STT endpoint takes all configuration as query parameters -- there is no config frame, and `token`, `format`, `sample_rate` and `language` are owned by the adapter (restating them here is ignored). `translate_languages` turns on live translation; those frames are delivered as ordinary transcripts tagged with the target language in `lang`, with their `end` advanced by 1ms per target so the failover dedup gate does not mistake them for a replay of the source final.
+Palabra's STT endpoint takes all configuration as query parameters; there is no config frame. token, format, sample_rate and language are set by the gateway, so restating them here has no effect. translate_languages turns on live translation: the translated frames arrive as ordinary transcripts tagged with the target language in `lang`.
 :::
 
 | Param | Type | Default | Applies to | What it does |

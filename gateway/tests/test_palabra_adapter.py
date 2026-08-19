@@ -1,4 +1,4 @@
-"""Palabra parser fixtures -- JSON shapes taken from the documented STT wire
+"""Palabra parser fixtures — JSON shapes taken from the documented STT wire
 (docs/providers/palabra.md, verified 2026-08-13 against docs.palabra.ai and
 the official SDK palabra-ai-python v2.1.0). No socket required."""
 
@@ -49,7 +49,7 @@ def test_partial_frame_is_not_final():
 def test_segment_times_are_seconds_and_words_are_absent():
     (t,) = parse_message(_frame(is_eos=True))
     assert t.start == 0.32 and t.end == 1.84
-    # Palabra gives segment-level times only -- no word timestamps at all.
+    # Palabra gives segment-level times only — no word timestamps at all.
     assert t.words is None
 
 
@@ -70,7 +70,7 @@ def test_empty_and_whitespace_transcripts_are_skipped():
 def test_translated_transcription_is_tagged_with_target_language():
     """Translated frames only arrive when the caller set translate_languages.
     They ride as Transcripts tagged by `lang`, so the client can tell them
-    from the source stream -- the Soniox model."""
+    from the source stream — the Soniox model."""
     events = parse_message(
         _frame("Hola mundo", is_eos=True, kind="translated_transcription", language="es")
     )
@@ -87,7 +87,7 @@ def test_translated_final_end_is_nudged_past_its_source():
     """A translated final copies the source final's `end`, and the session
     layer drops any final that does not advance past the previous one. Without
     the nudge the translation is swallowed above this adapter and the client
-    sees nothing -- so it is offset by one slot per target language."""
+    sees nothing — so it is offset by one slot per target language."""
     nudge = translation_nudges({"translate_languages": "es,de"})
     (source,) = parse_message(_frame("Hello world.", is_eos=True), translation_nudge=nudge)
     (es,) = parse_message(
@@ -109,7 +109,7 @@ def test_translated_final_end_is_nudged_past_its_source():
 def test_translation_nudge_is_deterministic_across_adapter_instances():
     """The slot comes from the caller's own target list, not from arrival
     order, so a replay into a fresh adapter after failover reproduces the same
-    `end` -- and stays deduplicated."""
+    `end` — and stays deduplicated."""
     assert translation_nudges({"translate_languages": "es,de"}) == {"es": 0.001, "de": 0.002}
     assert translation_nudges({"translate_languages": ["ES", " de "]}) == {"es": 0.001, "de": 0.002}
     assert translation_nudges({}) == {}
@@ -126,7 +126,7 @@ def test_translated_partials_keep_the_vendor_timestamp():
 
 def test_unlisted_target_language_still_clears_the_gate():
     """A target the caller did not list (or a code the server spells its own
-    way) falls back to one slot -- delivered, not silently dropped."""
+    way) falls back to one slot — delivered, not silently dropped."""
     (t,) = parse_message(
         _frame("Ciao", is_eos=True, kind="translated_transcription", language="it"),
         translation_nudge=translation_nudges({"translate_languages": "es"}),
@@ -268,7 +268,7 @@ def test_stereo_is_rejected_before_dialing():
 
 
 def test_send_audio_rechunks_to_320ms():
-    """Client framing is not forwarded verbatim -- Palabra wants 320ms frames."""
+    """Client framing is not forwarded verbatim — Palabra wants 320ms frames."""
     import asyncio
 
     class FakeWS:
@@ -327,7 +327,7 @@ def test_send_audio_paces_a_failover_replay():
 
 def test_finish_pads_with_silence_then_closes():
     """Live-verified 2026-08-13: closing the socket outright loses the last
-    utterance -- it stays a partial forever. Feeding silence makes Palabra's
+    utterance — it stays a partial forever. Feeding silence makes Palabra's
     endpointer fire and emit the final. Regression test for that fix."""
     import asyncio
 
@@ -398,7 +398,7 @@ def test_finish_and_close_are_idempotent():
 
 
 def test_connect_rejections_are_classified_by_http_status():
-    """401 is a bad key -- retrying or failing over to another Palabra session
+    """401 is a bad key — retrying or failing over to another Palabra session
     cannot help. 409 means a session is already live for this identity, which
     a retry after backoff may clear."""
     import asyncio
@@ -432,7 +432,7 @@ def test_connect_rejections_are_classified_by_http_status():
 
 
 def test_events_classify_the_close_code():
-    """1008 is a policy violation -- the same request will be refused again,
+    """1008 is a policy violation — the same request will be refused again,
     so it must not look recoverable to the failover engine."""
     import asyncio
 
@@ -529,7 +529,7 @@ def test_missing_credentials_are_rejected_before_dialing():
 
 
 def test_diarization_request_is_rejected():
-    """No speaker labels on this endpoint -- the resolver must refuse before
+    """No speaker labels on this endpoint — the resolver must refuse before
     a socket is opened rather than silently dropping the request."""
     from speechrouter_gateway.config import KeyStoreKind, Settings
     from speechrouter_gateway.router.catalog import Catalog

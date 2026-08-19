@@ -227,7 +227,7 @@ async def exp_idle(args, key, audio, rate, out) -> dict:
 
 
 async def exp_concurrent(args, key, audio, rate, out) -> dict:
-    """Q1 — the big one. Two sockets on one key at the same time. A 409 here
+    """Q1 — highest impact. Two sockets on one key at the same time. A 409 here
     means SPEECHROUTER_MAX_CONCURRENT_STREAMS oversubscribes Palabra and that
     failover will collide with its own closing socket."""
     rec_a, rec_b = Recorder(out, "concurrent_a"), Recorder(out, "concurrent_b")
@@ -309,7 +309,6 @@ async def exp_auth(args, _key, _audio, rate, out) -> dict:
 
 
 def prepare_out(path: str) -> Path:
-    """Sync helpers so blocking filesystem calls stay out of the event loop."""
     out = Path(path)
     out.mkdir(parents=True, exist_ok=True)
     return out

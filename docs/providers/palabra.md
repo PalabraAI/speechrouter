@@ -1,4 +1,4 @@
-# Palabra — STT protocol brief (verified 2026-08-12)
+# Palabra — STT protocol brief (verified 2026-08-13)
 
 Docs: docs.palabra.ai (`/docs/auth`, `/docs/streaming_api/realtime_stt`).
 Cross-checked against the official SDK, `github.com/PalabraAI/palabra-ai-python` v2.1.0 (`src/palabra_ai/{client,stt,events,audio}.py`) — every claim below that the docs left implicit is marked *(SDK)*.
@@ -30,7 +30,15 @@ JSON text frames keyed by `message_type`.
 
 `translated_transcription`: same shape minus `delta`; only when `translate_languages` is set, emitted after the source final; `transcription_id` matches the source. Live-confirmed working upstream — `translate_languages=es` returns clean Spanish finals per utterance.
 
-**Delivered, with a documented timestamp nudge.** *(live 2026-08-13)* A translated final carries the **same `end` timestamp** as the source final it belongs to, and arrives after it. `router/session.py` `_normalize()` drops any final whose end does not advance past `_last_final_end` — the failover dedup guarantee — so a verbatim translated final is swallowed one layer above the adapter and the client sees nothing. That invariant is load-bearing for failover and is **not** weakened for one provider: instead the adapter advances the translated final's `end` by 1ms per target language, in the order the caller listed them in `translate_languages` (`es` → +0.001, `de` → +0.002). The offset is deterministic, so a replay after failover reproduces the same `end` and stays deduped; it applies to finals only, since partials never reach the dedup gate. It is a fabrication of a few ms on a timestamp that is by construction a copy of the source segment's. The clean fix is still a dedicated translation event in `packages/spec` — this only keeps translation deliverable until that lands, without touching the session engine.
+**Delivered, with a documented timestamp nudge.** *(live 2026-08-13)* A translated final carries the **same `end` timestamp** as the source final it belongs to, and arrives after it. `router/session.py` `_normalize()` drops any final whose end does not advance past `_last_final_end`, so a verbatim translated final never reaches the client.
+
+Failover dedup depends on that invariant, so the adapter does not weaken it. Instead it advances the translated final's `end` by 1ms per target language, in the order the caller listed them in `translate_languages` (`es` → +0.001, `de` → +0.002):
+
+- finals only, since partials never reach the dedup gate;
+- deterministic: a replay after failover reproduces the same `end` and stays deduped;
+- the offset is a few ms on a timestamp that is a copy of the source segment's.
+
+The clean fix is a dedicated translation event in `packages/spec`; this keeps translation deliverable until that lands, without touching the session engine.
 
 **Do not confuse this with the S2S wire.** The translation lane uses different message types (`partial_transcription`, `validated_transcription`, `partial_translated_transcription`) with the payload nested under `data.transcription` *(SDK `events.py`)*. The STT lane is flat: top-level `segment`, finality via `is_eos`. Sample payloads found online are usually the S2S shape and do not apply here.
 
@@ -60,7 +68,7 @@ JSON text frames keyed by `message_type`.
 ## Adapter notes
 - URL-param config + close-code error classification → closest existing shape is **telnyx**, not soniox/gladia. Start from that adapter, but keep WS pings on (see Liveness) instead of Telnyx's `ping_interval=None`.
 - Until (2) is answered, `finish()` grace-waits then closes the socket itself — otherwise a client waiting for `done` hangs to the session hard cap (the Telnyx failure mode). There is no server-side EOS to wait for.
-- Pace inside `send_audio` at 320ms; do not forward client chunking verbatim. **Done**: `send_audio` buffers into exact 320ms frames and meters them through a token bucket. The bucket is capped at 4× realtime rather than 1×, because a failover replays up to `ring_buffer_seconds` of audio into a fresh adapter and a strictly-realtime adapter could never work that backlog off; 2s of credit may bank during a quiet stretch. Nothing above the adapter re-chunks or paces — `Capabilities.chunk_ms_*` and `realtime_pacing_required` are declarative, the session engine never reads them.
+- Pace inside `send_audio` at 320ms; do not forward client chunking verbatim. `send_audio` buffers into exact 320ms frames and meters them through a token bucket. The bucket is capped at 4× realtime rather than 1×, because a failover replays up to `ring_buffer_seconds` of audio into a fresh adapter and a strictly-realtime adapter could never work that backlog off; 2s of credit may bank during a quiet stretch. Nothing above the adapter re-chunks or paces — `Capabilities.chunk_ms_*` and `realtime_pacing_required` are declarative, the session engine never reads them.
 - Mono only: the wire has no channel count and the server assumes mono, so `connect()` rejects `channels != 1` instead of returning garbage.
 - `provider_params` may not restate `token`/`format`/`sample_rate`/`language` — `urlencode` would emit a second copy and let the server choose. Reserved keys are dropped with a warning.
 - The key is a query param, so error text goes through `redact()` before it can reach a log (websockets' `InvalidURI` quotes the URL back).
