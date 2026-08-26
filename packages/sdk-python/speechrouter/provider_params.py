@@ -139,6 +139,16 @@ OpenaiParams = TypedDict(
 )
 """Provider-specific options for openai/* models."""
 
+PalabraParams = TypedDict(
+    "PalabraParams",
+    {
+        "translate_languages": str,
+        "enable_filler_filter": bool,
+    },
+    total=False,
+)
+"""Provider-specific options for palabra/* models."""
+
 SonioxParams = TypedDict(
     "SonioxParams",
     {
@@ -188,6 +198,7 @@ PROVIDER_PARAMS = {
     "groq": GroqParams,
     "mistral": MistralParams,
     "openai": OpenaiParams,
+    "palabra": PalabraParams,
     "soniox": SonioxParams,
     "speechmatics": SpeechmaticsParams,
     "telnyx": TelnyxParams,

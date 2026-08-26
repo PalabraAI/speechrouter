@@ -4,7 +4,7 @@ description: Every provider behind the one API.
 sidebar: { order: 0, label: Overview }
 ---
 
-13 providers, 37 models, one schema. Prices below are
+14 providers, 38 models, one schema. Prices below are
 vendor list prices — [we add nothing](/guides/pricing/).
 
 - [Soniox](/providers/soniox/) — 60+ languages with translation-grade accuracy; realtime bills wall-clock session time.
@@ -18,6 +18,7 @@ vendor list prices — [we add nothing](/guides/pricing/).
 - [Groq](/providers/groq/) — Whisper on LPUs — the fastest batch Whisper anywhere.
 - [Mistral](/providers/mistral/) — Voxtral — open-weights transcription via Mistral's API.
 - [OpenAI](/providers/openai/) — Whisper and the GPT-4o transcribe family — LLM-grade accuracy.
+- [Palabra](/providers/palabra/) — Realtime ASR at $0.002/min, with live translation available on the same socket.
 - [Speechmatics](/providers/speechmatics/) — Broad language coverage; Melia-1 code-switches across 56 languages.
 - [Telnyx](/providers/telnyx/) — Whisper Large-v3-Turbo as a live stream — 100 languages, hosted by Telnyx.
 

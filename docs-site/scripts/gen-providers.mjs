@@ -15,6 +15,7 @@ const NAMES = {
   openai: 'OpenAI', speechmatics: 'Speechmatics', azure: 'Azure',
   aws: 'AWS', google: 'Google', groq: 'Groq', mistral: 'Mistral',
   elevenlabs: 'ElevenLabs', cartesia: 'Cartesia', telnyx: 'Telnyx',
+  palabra: 'Palabra',
 };
 
 const BLURBS = {
@@ -31,6 +32,7 @@ const BLURBS = {
   elevenlabs: 'Scribe — high-accuracy STT from the voice company.',
   cartesia: 'Ink — low-latency STT built for realtime agents.',
   telnyx: 'Whisper Large-v3-Turbo as a live stream — 100 languages, hosted by Telnyx.',
+  palabra: 'Realtime ASR at $0.002/min, with live translation available on the same socket.',
 };
 
 const esc = (t) => String(t).replace(/\|/g, '\\|');

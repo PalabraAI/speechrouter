@@ -26,6 +26,7 @@ PROVIDER_KEY_FIELDS = {
     "mistral": "mistral_api_key",
     "cartesia": "cartesia_api_key",
     "elevenlabs": "elevenlabs_api_key",
+    "palabra": "palabra_api_key",
 }
 
 

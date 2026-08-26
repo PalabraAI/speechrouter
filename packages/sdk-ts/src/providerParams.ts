@@ -167,6 +167,15 @@ export interface OpenaiParams {
   [key: string]: unknown
 }
 
+/** Provider-specific options for `palabra/*` models. */
+export interface PalabraParams {
+  /** Comma-separated target languages (e.g. es,de,fr); translations arrive as transcripts tagged by `lang` — applies to streaming */
+  translate_languages?: string
+  /** Strip filler words; on by default for every language except ja — @default true; applies to streaming */
+  enable_filler_filter?: boolean
+  [key: string]: unknown
+}
+
 /** Provider-specific options for `soniox/*` models. */
 export interface SonioxParams {
   /** Restrict recognition to the hinted languages — @default false; applies to streaming + batch */
@@ -224,6 +233,7 @@ export interface ProviderParamsMap {
   groq: GroqParams
   mistral: MistralParams
   openai: OpenaiParams
+  palabra: PalabraParams
   soniox: SonioxParams
   speechmatics: SpeechmaticsParams
   telnyx: TelnyxParams
