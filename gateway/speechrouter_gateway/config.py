@@ -47,6 +47,11 @@ class Settings(BaseSettings):
     telnyx_api_key: str = ""
     mistral_api_key: str = ""
     palabra_api_key: str = ""
+    # Gemini Live transcription — a plain Gemini API key from
+    # aistudio.google.com. Unrelated to the google_* settings below:
+    # that is Google Cloud Speech-to-Text, a different product with a
+    # different credential.
+    gemini_api_key: str = ""
     # Palabra endpoints are per-region; STT is served from `eu` only today.
     palabra_region: str = "eu"
     google_project_id: str = ""

@@ -1,7 +1,7 @@
 ---
 title: Groq
 description: Whisper on LPUs — the fastest batch Whisper anywhere.
-sidebar: { order: 9 }
+sidebar: { order: 10 }
 ---
 
 Whisper on LPUs — the fastest batch Whisper anywhere.

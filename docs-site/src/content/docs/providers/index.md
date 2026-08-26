@@ -4,7 +4,7 @@ description: Every provider behind the one API.
 sidebar: { order: 0, label: Overview }
 ---
 
-14 providers, 38 models, one schema. Prices below are
+15 providers, 39 models, one schema. Prices below are
 vendor list prices — [we add nothing](/guides/pricing/).
 
 - [Soniox](/providers/soniox/) — 60+ languages with translation-grade accuracy; realtime bills wall-clock session time.
@@ -14,6 +14,7 @@ vendor list prices — [we add nothing](/guides/pricing/).
 - [Cartesia](/providers/cartesia/) — Ink — low-latency STT built for realtime agents.
 - [Deepgram](/providers/deepgram/) — The realtime workhorse — fast, cheap, excellent English.
 - [ElevenLabs](/providers/elevenlabs/) — Scribe — high-accuracy STT from the voice company.
+- [Gemini](/providers/gemini/) — Gemini 3.5 Transcribe Live at $0.30/hr — 85+ languages, custom vocabulary, and a SMART mode that cleans up disfluencies as it goes.
 - [Google](/providers/google/) — Google Cloud Speech-to-Text (Chirp).
 - [Groq](/providers/groq/) — Whisper on LPUs — the fastest batch Whisper anywhere.
 - [Mistral](/providers/mistral/) — Voxtral — open-weights transcription via Mistral's API.
