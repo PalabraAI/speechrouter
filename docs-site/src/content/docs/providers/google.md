@@ -1,7 +1,7 @@
 ---
 title: Google
 description: Google Cloud Speech-to-Text (Chirp).
-sidebar: { order: 8 }
+sidebar: { order: 9 }
 ---
 
 Google Cloud Speech-to-Text (Chirp).

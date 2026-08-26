@@ -119,6 +119,19 @@ export interface ElevenlabsParams {
   [key: string]: unknown
 }
 
+/** Provider-specific options for `gemini/*` models. */
+export interface GeminiParams {
+  /** VERBATIM keeps fillers, repetitions and false starts; SMART removes disfluencies and applies punctuation, grammar and casing — @default "VERBATIM"; applies to streaming */
+  mode?: 'VERBATIM' | 'SMART'
+  /** BCP-47 codes to constrain recognition; empty (the default) means automatic detection. Use this instead of `language` to allow several languages — applies to streaming */
+  languageCodes?: unknown[]
+  /** Up to 1000 phrases biasing recognition toward domain terms; Google recommends staying near 100. Same field the unified `keyterms` sets — applies to streaming */
+  customVocabulary?: unknown[]
+  /** Voice-activity tuning, e.g. {"automaticActivityDetection": {"silenceDurationMs": 500, "prefixPaddingMs": 100}}; set automaticActivityDetection.disabled to drive turns yourself — applies to streaming */
+  realtimeInputConfig?: Record<string, unknown>
+  [key: string]: unknown
+}
+
 /** Provider-specific options for `google/*` models. */
 export interface GoogleParams {
   [key: string]: unknown
@@ -229,6 +242,7 @@ export interface ProviderParamsMap {
   cartesia: CartesiaParams
   deepgram: DeepgramParams
   elevenlabs: ElevenlabsParams
+  gemini: GeminiParams
   google: GoogleParams
   groq: GroqParams
   mistral: MistralParams
