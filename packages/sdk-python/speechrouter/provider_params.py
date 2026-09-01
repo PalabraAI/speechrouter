@@ -94,6 +94,18 @@ ElevenlabsParams = TypedDict(
 )
 """Provider-specific options for elevenlabs/* models."""
 
+GeminiParams = TypedDict(
+    "GeminiParams",
+    {
+        "mode": Literal["VERBATIM", "SMART"],
+        "languageCodes": list,
+        "customVocabulary": list,
+        "realtimeInputConfig": dict,
+    },
+    total=False,
+)
+"""Provider-specific options for gemini/* models."""
+
 GoogleParams = TypedDict(
     "GoogleParams",
     {},
@@ -207,6 +219,7 @@ PROVIDER_PARAMS = {
     "cartesia": CartesiaParams,
     "deepgram": DeepgramParams,
     "elevenlabs": ElevenlabsParams,
+    "gemini": GeminiParams,
     "google": GoogleParams,
     "groq": GroqParams,
     "meta": MetaParams,

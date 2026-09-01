@@ -5,7 +5,7 @@
 <h1 align="center">SpeechRouter</h1>
 
 <p align="center"><b>One API for every speech model.</b><br>
-Streaming speech-to-text across 15 providers with mid-stream failover —<br>
+Streaming speech-to-text across 16 providers with mid-stream failover —<br>
 one key, one schema, switch vendors by editing a string.</p>
 
 <p align="center">
@@ -36,7 +36,7 @@ fallback and keeps transcribing** — your client sees a `provider_switched`
 event, not an outage. Suppressed duplicate finals mean no words are lost or
 repeated at the seam.
 
-- 🎛 **30+ models, 15 providers** — Deepgram (incl. Flux), Soniox, AssemblyAI, Speechmatics, OpenAI, Groq, Mistral, Cartesia (incl. ink-2 turns), ElevenLabs, Azure, AWS, Google, Telnyx, Palabra, Meta (Muse)
+- 🎛 **40 models, 16 providers** — Deepgram (incl. Flux), Soniox, AssemblyAI, Speechmatics, OpenAI, Groq, Mistral, Cartesia (incl. ink-2 turns), ElevenLabs, Azure, AWS, Google, Gemini, Telnyx, Palabra, Meta (Muse)
 - 🔌 **One normalized schema** — text, word timings, confidence, speakers, language; `include_raw=true` for the untouched vendor payload
 - 💸 **One bill** — per-second pricing, prepaid credits, no vendor contracts; or **BYOK** with your own provider keys for free — pure pass-through, 0% markup
 - 🔁 **Same params everywhere** — diarization, interims, keyterm boosting, endpointing, translated per provider; `provider_params` passes anything vendor-specific through
@@ -143,6 +143,7 @@ gateway models are code-generated from them and CI fails on drift.
 | Azure Speech | ✅ | ✅ | streaming via `[azure]` extra |
 | AWS Transcribe | ✅ | soon | native SigV4 event-stream codec |
 | Google Cloud STT | ✅ | soon | gRPC v2, via `[google]` extra |
+| Gemini | ✅ | — | gemini-3.5-transcribe-live; $0.30/hr, VERBATIM or SMART |
 | Palabra | ✅ | — | $0.002/min; live translation on the same socket |
 | Meta (Muse) | ✅ | ✅ | turn detection + speaker labels, $0.18/hr; linear16 @ 16/24 kHz only |
 
@@ -182,7 +183,7 @@ Self-host mode needs no database. Azure streaming and Google need extras:
    /v1/listen           │   auth → resolve → session engine      │
    /v1/audio/transcr.   │   ┌──────────────────────────────┐     │
    /v1/models           │   │ ring buffer · failover ·     │     │──► provider adapters
-                        │   │ dedup · usage metering       │     │    (15 vendors, ws/grpc/rest)
+                        │   │ dedup · usage metering       │     │    (16 vendors, ws/grpc/rest)
                         │   └──────────────────────────────┘     │
                         └────────────────────────────────────────┘
 ```

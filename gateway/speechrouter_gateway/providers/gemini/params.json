@@ -1,0 +1,45 @@
+{
+  "forwarding": {
+    "streaming": "the Live API `setup` message"
+  },
+  "note": "Keys are the Live API's own camelCase field names. `mode`, `languageCodes` and `customVocabulary` are merged into setup.inputAudioTranscription; anything else lands at the top level of `setup` (realtimeInputConfig, contextWindowCompression, ...). `model` and `sessionResumption` are owned by the adapter — it reconnects on its own around the ~10-minute connection cap — and are dropped with a warning. The unified `language` sets languageCodes and `keyterms` sets customVocabulary; restating them here overrides that.",
+  "params": [
+    {
+      "name": "mode",
+      "type": "string",
+      "enum": [
+        "VERBATIM",
+        "SMART"
+      ],
+      "default": "VERBATIM",
+      "modes": [
+        "streaming"
+      ],
+      "doc": "VERBATIM keeps fillers, repetitions and false starts; SMART removes disfluencies and applies punctuation, grammar and casing"
+    },
+    {
+      "name": "languageCodes",
+      "type": "array",
+      "modes": [
+        "streaming"
+      ],
+      "doc": "BCP-47 codes to constrain recognition; empty (the default) means automatic detection. Use this instead of `language` to allow several languages"
+    },
+    {
+      "name": "customVocabulary",
+      "type": "array",
+      "modes": [
+        "streaming"
+      ],
+      "doc": "Up to 1000 phrases biasing recognition toward domain terms; Google recommends staying near 100. Same field the unified `keyterms` sets"
+    },
+    {
+      "name": "realtimeInputConfig",
+      "type": "object",
+      "modes": [
+        "streaming"
+      ],
+      "doc": "Voice-activity tuning, e.g. {\"automaticActivityDetection\": {\"silenceDurationMs\": 500, \"prefixPaddingMs\": 100}}; set automaticActivityDetection.disabled to drive turns yourself"
+    }
+  ]
+}

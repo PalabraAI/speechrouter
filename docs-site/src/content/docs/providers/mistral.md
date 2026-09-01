@@ -1,7 +1,7 @@
 ---
 title: Mistral
 description: Voxtral — open-weights transcription via Mistral's API.
-sidebar: { order: 11 }
+sidebar: { order: 12 }
 ---
 
 Voxtral — open-weights transcription via Mistral's API.

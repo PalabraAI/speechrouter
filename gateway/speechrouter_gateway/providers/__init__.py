@@ -18,6 +18,7 @@ from .deepgram import adapter as _deepgram_adapter  # noqa: F401  (self-register
 from .deepgram import batch as _deepgram_batch  # noqa: F401
 from .elevenlabs import adapter as _elevenlabs_adapter  # noqa: F401
 from .elevenlabs import batch as _elevenlabs_batch  # noqa: F401
+from .gemini import adapter as _gemini_adapter  # noqa: F401  (self-registers)
 from .google import adapter as _google_adapter  # noqa: F401
 from .groq import batch as _groq_batch  # noqa: F401
 from .meta import adapter as _meta_adapter  # noqa: F401  (self-registers)

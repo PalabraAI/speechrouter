@@ -15,7 +15,7 @@ const NAMES = {
   openai: 'OpenAI', speechmatics: 'Speechmatics', azure: 'Azure',
   aws: 'AWS', google: 'Google', groq: 'Groq', mistral: 'Mistral',
   elevenlabs: 'ElevenLabs', cartesia: 'Cartesia', telnyx: 'Telnyx',
-  palabra: 'Palabra', meta: 'Meta',
+  palabra: 'Palabra', gemini: 'Gemini', meta: 'Meta',
 };
 
 const BLURBS = {
@@ -33,6 +33,7 @@ const BLURBS = {
   cartesia: 'Ink — low-latency STT built for realtime agents.',
   telnyx: 'Whisper Large-v3-Turbo as a live stream — 100 languages, hosted by Telnyx.',
   palabra: 'Realtime ASR at $0.002/min, with live translation available on the same socket.',
+  gemini: 'Gemini 3.5 Transcribe Live at $0.30/hr — 85+ languages, custom vocabulary, and a SMART mode that cleans up disfluencies as it goes.',
   meta: 'Muse Voice Transcribe — 25 languages with code-switching, turn detection and speaker labels at $0.18/hr.',
 };
 
