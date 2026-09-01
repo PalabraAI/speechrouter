@@ -1,7 +1,7 @@
 ---
 title: OpenAI
 description: Whisper and the GPT-4o transcribe family — LLM-grade accuracy.
-sidebar: { order: 12 }
+sidebar: { order: 13 }
 ---
 
 Whisper and the GPT-4o transcribe family — LLM-grade accuracy.

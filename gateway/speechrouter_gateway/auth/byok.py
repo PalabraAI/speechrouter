@@ -28,6 +28,7 @@ PROVIDER_KEY_FIELDS = {
     "elevenlabs": "elevenlabs_api_key",
     "palabra": "palabra_api_key",
     "gemini": "gemini_api_key",
+    "meta": "meta_api_key",
 }
 
 

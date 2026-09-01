@@ -124,6 +124,19 @@ GroqParams = TypedDict(
 )
 """Provider-specific options for groq/* models."""
 
+MetaParams = TypedDict(
+    "MetaParams",
+    {
+        "mode": Literal["ENDPOINTING", "PUSH_TO_TALK", "DIARIZATION"],
+        "languageBias": list,
+        "keywords": list,
+        "zdrOverride": bool,
+        "sessionId": str,
+    },
+    total=False,
+)
+"""Provider-specific options for meta/* models."""
+
 MistralParams = TypedDict(
     "MistralParams",
     {
@@ -209,6 +222,7 @@ PROVIDER_PARAMS = {
     "gemini": GeminiParams,
     "google": GoogleParams,
     "groq": GroqParams,
+    "meta": MetaParams,
     "mistral": MistralParams,
     "openai": OpenaiParams,
     "palabra": PalabraParams,

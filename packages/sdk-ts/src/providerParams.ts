@@ -148,6 +148,21 @@ export interface GroqParams {
   [key: string]: unknown
 }
 
+/** Provider-specific options for `meta/*` models. */
+export interface MetaParams {
+  /** Turn detection. ENDPOINTING emits one final per detected utterance; PUSH_TO_TALK emits a single final when input ends (no turn timestamps); DIARIZATION adds speaker labels — @default "ENDPOINTING"; applies to streaming + batch */
+  mode?: 'ENDPOINTING' | 'PUSH_TO_TALK' | 'DIARIZATION'
+  /** Language names to steer recognition toward, e.g. ["English", "French"]; merged with `language` — applies to streaming + batch */
+  languageBias?: unknown[]
+  /** Vocabulary to bias toward (names, jargon, product terms); merged with `keyterms` — applies to streaming + batch */
+  keywords?: unknown[]
+  /** Override the account's Zero Data Retention policy for this session: true forces metadata-only logging — applies to streaming */
+  zdrOverride?: boolean
+  /** Correlation id echoed in Meta's server logs; generated upstream when omitted — applies to streaming + batch */
+  sessionId?: string
+  [key: string]: unknown
+}
+
 /** Provider-specific options for `mistral/*` models. */
 export interface MistralParams {
   /** Up to 100 bias terms (English-optimized) — applies to batch */
@@ -245,6 +260,7 @@ export interface ProviderParamsMap {
   gemini: GeminiParams
   google: GoogleParams
   groq: GroqParams
+  meta: MetaParams
   mistral: MistralParams
   openai: OpenaiParams
   palabra: PalabraParams

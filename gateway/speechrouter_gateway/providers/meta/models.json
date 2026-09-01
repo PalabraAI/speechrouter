@@ -1,0 +1,58 @@
+[
+  {
+    "slug": "meta/muse-voice-transcribe-1.0",
+    "provider": "meta",
+    "name": "Muse Voice Transcribe 1.0",
+    "kind": "stt",
+    "modes": [
+      "streaming",
+      "batch"
+    ],
+    "pricing": {
+      "per_audio_hour_usd": 0.18
+    },
+    "capabilities": {
+      "diarization": true,
+      "word_timestamps": false,
+      "interim_results": true,
+      "endpointing": true,
+      "keyword_boosting": true,
+      "languages": [
+        "auto",
+        "ar",
+        "bn",
+        "de",
+        "en",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "kn",
+        "ko",
+        "mr",
+        "ms",
+        "nl",
+        "pl",
+        "pt",
+        "ta",
+        "te",
+        "th",
+        "tl",
+        "tr",
+        "vi",
+        "zh"
+      ],
+      "encodings": [
+        "linear16"
+      ],
+      "sample_rates": [
+        16000,
+        24000
+      ],
+      "max_audio_seconds": 600
+    }
+  }
+]

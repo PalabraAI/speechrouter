@@ -4,7 +4,7 @@ description: Every provider behind the one API.
 sidebar: { order: 0, label: Overview }
 ---
 
-15 providers, 39 models, one schema. Prices below are
+16 providers, 40 models, one schema. Prices below are
 vendor list prices — [we add nothing](/guides/pricing/).
 
 - [Soniox](/providers/soniox/) — 60+ languages with translation-grade accuracy; realtime bills wall-clock session time.
@@ -17,6 +17,7 @@ vendor list prices — [we add nothing](/guides/pricing/).
 - [Gemini](/providers/gemini/) — Gemini 3.5 Transcribe Live at $0.30/hr — 85+ languages, custom vocabulary, and a SMART mode that cleans up disfluencies as it goes.
 - [Google](/providers/google/) — Google Cloud Speech-to-Text (Chirp).
 - [Groq](/providers/groq/) — Whisper on LPUs — the fastest batch Whisper anywhere.
+- [Meta](/providers/meta/) — Muse Voice Transcribe — 25 languages with code-switching, turn detection and speaker labels at $0.18/hr.
 - [Mistral](/providers/mistral/) — Voxtral — open-weights transcription via Mistral's API.
 - [OpenAI](/providers/openai/) — Whisper and the GPT-4o transcribe family — LLM-grade accuracy.
 - [Palabra](/providers/palabra/) — Realtime ASR at $0.002/min, with live translation available on the same socket.
