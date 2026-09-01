@@ -20,6 +20,8 @@ from .elevenlabs import adapter as _elevenlabs_adapter  # noqa: F401
 from .elevenlabs import batch as _elevenlabs_batch  # noqa: F401
 from .google import adapter as _google_adapter  # noqa: F401
 from .groq import batch as _groq_batch  # noqa: F401
+from .meta import adapter as _meta_adapter  # noqa: F401  (self-registers)
+from .meta import batch as _meta_batch  # noqa: F401
 from .mistral import adapter as _mistral_adapter  # noqa: F401
 from .mistral import batch as _mistral_batch  # noqa: F401
 from .openai import adapter as _openai_adapter  # noqa: F401
