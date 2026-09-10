@@ -1,7 +1,7 @@
 ---
 title: Telnyx
 description: Whisper Large-v3-Turbo as a live stream — 100 languages, hosted by Telnyx.
-sidebar: { order: 13 }
+sidebar: { order: 14 }
 ---
 
 Whisper Large-v3-Turbo as a live stream — 100 languages, hosted by Telnyx.
