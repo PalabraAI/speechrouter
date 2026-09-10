@@ -53,7 +53,7 @@ JSON text frames keyed by `message_type`.
 3. Idle timeout through silence. Partly answered: liveness is WS ping/pong, no app keepalive *(SDK)* — but how long a ping-healthy, audio-silent socket survives is still unknown.
 4. Is `is_eos:true` a real VAD edge worth mapping to `utterance_end`?
 5. Session/stream duration cap.
-6. Source + target language codes — `/docs/languages` is client-rendered, didn't come through a plain fetch. `models.json` ships `languages: ["auto"]` until this is filled in.
+6. Source language codes — **deliberately not mirrored in the adapter**: the server owns the list and it changes without the integration. `models.json` keeps `languages: ["auto"]`. An unknown code is refused on the upgrade with **HTTP 400** and a body like `invalid parameter "language": unsupported language code "xx"; one of: …` *(live 2026-09-10 on dev)*; the adapter raises a non-recoverable error with code `invalid_request` carrying that text, and `router/session.py` forwards it to the client verbatim under `invalid_request` (fallbacks, if any, are still tried first). Every other provider error stays masked as before. Target codes for `translate_languages` still unconfirmed.
 7. ~~Price and billing unit~~ — answered, see Pricing.
 8. Faster-than-realtime ingest: the SDK paces because "the server requires it" and the wire carries `AUDIO_STREAM_TOO_FAST` *(SDK)* — so set `realtime_pacing_required=True` unless a burst test shows the server merely warns. Open question is warn-vs-drop, not whether pacing matters.
 
@@ -65,4 +65,4 @@ JSON text frames keyed by `message_type`.
 - `provider_params` may not restate `token`/`format`/`sample_rate`/`language` — `urlencode` would emit a second copy and let the server choose. Reserved keys are dropped with a warning.
 - The key is a query param, so error text goes through `redact()` before it can reach a log (websockets' `InvalidURI` quotes the URL back).
 - `keyterms=False`: no boosting param exists on this endpoint. Palabra does ship *hotword* glossaries, but they are a management REST API bound to the **S2S** pipeline *(SDK `management.py`)* — not reachable from these query params.
-- Capabilities draft: `streaming`/`interim_results` True; `realtime_pacing_required` True; `word_timestamps`/`diarization`/`keyterms` False; encodings {linear16, linear32, mulaw, alaw}; chunk_ms ≈320; `languages={"auto"}` pending (6); `endpointing` pending (4); `billing_basis` pending (7).
+- Capabilities draft: `streaming`/`interim_results` True; `realtime_pacing_required` True; `word_timestamps`/`diarization`/`keyterms` False; encodings {linear16, linear32, mulaw, alaw}; chunk_ms ≈320; `languages={"auto"}` by design (6); `endpointing` pending (4); `billing_basis` pending (7).
